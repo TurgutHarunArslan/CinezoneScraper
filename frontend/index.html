@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" href="global.css">
+</head>
+<body>
+    <nav class="topnav">
+        <a class="active" href="/">Home</a>
+    </nav>
+    <div id="searchBar">
+        <input type="text" name="Search" id="Search" onchange="Search()" placeholder="Search show or movie">
+        <button onclick="Search()">Search</button>
+    </div>
+    <div id="SearchResults"></div>
+</body>
+</html>
+
+<script>
+    let resultsdiv = document.querySelector("#SearchResults")
+    let dev = false
+    let BaseUrl = ""
+    if (dev == true){
+        BaseUrl = "http://0.0.0.0:3000/"
+    }else{
+        BaseUrl = "https://spreading-club-municipal-saver.trycloudflare.com/"
+    }
+
+    resultsdiv.addEventListener("click",function(event){
+        let parent = event.target.parentElement
+        console.log(parent)
+        if (parent.tagName == "DIV"){
+            let id = parent.getAttribute("data-id")
+            const baseUrl = window.location.origin;
+            const newUrl = new URL('/movie.html', baseUrl);
+            newUrl.searchParams.set('TrackId', id);
+            window.location.href = newUrl.toString()
+        }
+    })
+
+    function CreateMovieResult(id, title, img) {
+        if(id == null){
+            return
+        }
+        let div = document.createElement("div");
+        let titleEl = document.createElement("p");
+        let imgEl = document.createElement("img");
+        div.setAttribute("data-id", id);
+        div.className = "movie-item"
+        titleEl.textContent = title;
+        imgEl.src = img;
+        imgEl.className = "img"
+        div.appendChild(imgEl);
+        div.appendChild(titleEl);
+        resultsdiv.appendChild(div);
+    }
+
+    async function ApiCall(endpoint,query) {
+        let r = await fetch(BaseUrl + endpoint + query)
+        return await r.json()
+    }
+    function Search(){
+        let query = document.getElementById("Search").value
+        data = ApiCall("search","?q=" + query).then((data) => {
+            resultsdiv.innerHTML = ""
+            data.forEach(element => {
+                CreateMovieResult(element["Id"],element["Title"],element["Img"])
+            });
+        })
+    }
+</script>
+
+<style>
+    #searchBar{
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        height: 5%;
+    }
+    #searchBar > input{
+        width: 30%;
+        background-color: black;
+        border: none;
+        color: white;
+    }
+    #SearchResults{
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 5%;
+        gap: 20px;
+    }
+    .img{
+        width: 100%;
+        height: 80%;
+        object-fit: fill;
+    }
+    .movie-item{
+        width: 300px;
+        height: 400px;
+        text-align: center;
+        cursor: pointer;
+    }
+</style>
