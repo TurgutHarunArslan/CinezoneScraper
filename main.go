@@ -21,6 +21,5 @@ import (
 func main()  {
 	utils.SetupKeys()
 	go api.StartServer()
-	go api.StartFrontEnd()
 	select {}
 }
